@@ -417,6 +417,7 @@ public:
 		//sceneData.matricies[1] = world;
 		// grab the current Vulkan commandBuffer
 		sceneData.viewMatrix = camera;
+		sceneData.cameraPos = camera.row4;
 		unsigned int currentBuffer;
 		vlk.GetSwapchainCurrentImage(currentBuffer);
 		VkCommandBuffer commandBuffer;
@@ -447,16 +448,18 @@ public:
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet[currentImage], 0, nullptr);
 		unsigned indexOffset = 0;
 		unsigned vertexOffset = 0;
+		unsigned materialOffset = 0;
 		for (size_t j = 0; j < levelData.levelModels.size(); j++)
 		{
 			pushConstants.startWorld = levelData.levelInstances[j].transformStart;
 			for (int i = levelData.levelModels[j].meshStart; i < levelData.levelModels[j].meshCount + levelData.levelModels[j].meshStart; ++i) {
-				pushConstants.materialIndex = levelData.levelMeshes[i].materialIndex;
+				pushConstants.materialIndex = levelData.levelMeshes[i].materialIndex + materialOffset;
 				vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(Push_Constants), &pushConstants);
 				vkCmdDrawIndexed(commandBuffer, levelData.levelMeshes[i].drawInfo.indexCount, levelData.levelInstances[j].transformCount, levelData.levelMeshes[i].drawInfo.indexOffset + indexOffset, vertexOffset, 0);
 			}
 			indexOffset += levelData.levelModels[j].indexCount;
 			vertexOffset += levelData.levelModels[j].vertexCount;
+			materialOffset += levelData.levelModels[j].materialCount;
 		}
 
 		start = std::chrono::steady_clock::now();
