@@ -43,11 +43,18 @@ class Renderer
 		GW::MATH::GMATRIXF matricies[MAX_SUBMESH_PER_DRAW]; // world space transforms
 		H2B::ATTRIBUTES materials[MAX_SUBMESH_PER_DRAW]; // color/texture of surface
 	};
+	struct Push_Constants {
+		unsigned materialIndex;
+		unsigned startWorld;
+	};
 	// proxy handles
 	GW::SYSTEM::GWindow win;
 	GW::GRAPHICS::GVulkanSurface vlk;
 	GW::CORE::GEventReceiver shutdown;
 	Level_Data levelData;
+
+	GW::INPUT::GInput inputProxy;
+	GW::INPUT::GController controllerProxy;
 
 	// what we need at a minimum to draw a triangle
 	VkDevice device = nullptr;
@@ -83,6 +90,7 @@ class Renderer
 	GW::MATH::GVECTORF lightClr = { 0.9, 0.9, 1.0};
 	// TODO: Part 2b
 	SHADER_MODEL_DATA sceneData;
+	Push_Constants pushConstants;
 	// TODO: Part 4g
 public:
 
@@ -95,6 +103,9 @@ public:
 		unsigned int width, height;
 		win.GetClientWidth(width);
 		win.GetClientHeight(height);
+
+		inputProxy.Create(win);
+		controllerProxy.Create();
 		// TODO: Part 2a
 		proxy.Create();
 		GW::MATH::GVECTORF eye = { 0.75, 0.25, -1.5, 1 };
@@ -109,8 +120,8 @@ public:
 		sceneData.viewMatrix = camera;
 		sceneData.projectionMatrix = perspective;
 		sceneData.cameraPos = eye;
-		sceneData.matricies[0] = world;
-		sceneData.matricies[1] = world;
+		//sceneData.matricies[0] = world;
+		//sceneData.matricies[1] = world;
 
 
 		// TODO: Part 4g
@@ -118,9 +129,9 @@ public:
 		for (int i = 0; i < levelData.levelMaterials.size(); ++i) {
 			sceneData.materials[i] = levelData.levelMaterials[i].attrib;
 		}
-		/*for (int i = 0; i < levelData.levelTransforms.size(); ++i) {
+		for (int i = 0; i < levelData.levelTransforms.size(); ++i) {
 			sceneData.matricies[i] = levelData.levelTransforms[i];
-		}*/
+		}
 		//sceneData.matricies[0] = GW::MATH::GIdentityMatrixF;
 
 		/***************** GEOMETRY INTIALIZATION ******************/
@@ -361,7 +372,7 @@ public:
 		// TODO: Part 3c
 		VkPushConstantRange push_constant_range = {};
 		push_constant_range.offset = 0;
-		push_constant_range.size = sizeof(unsigned);
+		push_constant_range.size = sizeof(Push_Constants);
 		push_constant_range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
 		pipeline_layout_create_info.pushConstantRangeCount = 1;
@@ -405,6 +416,7 @@ public:
 		// TODO: Part 4d
 		//sceneData.matricies[1] = world;
 		// grab the current Vulkan commandBuffer
+		sceneData.viewMatrix = camera;
 		unsigned int currentBuffer;
 		vlk.GetSwapchainCurrentImage(currentBuffer);
 		VkCommandBuffer commandBuffer;
@@ -437,14 +449,76 @@ public:
 		unsigned vertexOffset = 0;
 		for (size_t j = 0; j < levelData.levelModels.size(); j++)
 		{
+			pushConstants.startWorld = levelData.levelInstances[j].transformStart;
 			for (int i = levelData.levelModels[j].meshStart; i < levelData.levelModels[j].meshCount + levelData.levelModels[j].meshStart; ++i) {
-				vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(unsigned), &levelData.levelMeshes[i].materialIndex);
-				vkCmdDrawIndexed(commandBuffer, levelData.levelMeshes[i].drawInfo.indexCount, 1, levelData.levelMeshes[i].drawInfo.indexOffset + indexOffset, vertexOffset, 0);
+				pushConstants.materialIndex = levelData.levelMeshes[i].materialIndex;
+				vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(Push_Constants), &pushConstants);
+				vkCmdDrawIndexed(commandBuffer, levelData.levelMeshes[i].drawInfo.indexCount, levelData.levelInstances[j].transformCount, levelData.levelMeshes[i].drawInfo.indexOffset + indexOffset, vertexOffset, 0);
 			}
 			indexOffset += levelData.levelModels[j].indexCount;
 			vertexOffset += levelData.levelModels[j].vertexCount;
 		}
 
+		start = std::chrono::steady_clock::now();
+	}
+
+	void UpdateCamera() {
+		const float cameraSpeed = 0.3;
+		auto end = std::chrono::steady_clock::now();
+		std::chrono::duration<float> timer = end - start;
+		float frameSpeed = cameraSpeed * timer.count();
+		float thumbSpeed = (355 / 113) * timer.count();
+		// TODO: Part 4c
+		GW::MATH::GMATRIXF tempCam;
+		proxy.InverseF(camera, tempCam);
+		// TODO: Part 4d
+		float rTrig = 0;
+		float lTrig = 0;
+		float space = 0;
+		float shift = 0;
+		float wKey = 0;
+		float sKey = 0;
+		float LYStick = 0;
+		float aKey = 0;
+		float dKey = 0;
+		float LXStick = 0;
+		float mouseX = 0;
+		float mouseY = 0;
+		float RYStick = 0;
+		float RXStick = 0;
+		controllerProxy.GetState(0, G_RIGHT_TRIGGER_AXIS, rTrig);
+		controllerProxy.GetState(0, G_LEFT_TRIGGER_AXIS, lTrig);
+		controllerProxy.GetState(0, G_LY_AXIS, LYStick);
+		controllerProxy.GetState(0, G_LX_AXIS, LXStick);
+		controllerProxy.GetState(0, G_RY_AXIS, RYStick);
+		controllerProxy.GetState(0, G_RX_AXIS, RXStick);
+		inputProxy.GetState(G_KEY_SPACE, space);
+		inputProxy.GetState(G_KEY_LEFTSHIFT, shift);
+		inputProxy.GetState(G_KEY_W, wKey);
+		inputProxy.GetState(G_KEY_S, sKey);
+		inputProxy.GetState(G_KEY_A, aKey);
+		inputProxy.GetState(G_KEY_D, dKey);
+		if (inputProxy.GetMouseDelta(mouseX, mouseY) == GW::GReturn::REDUNDANT) {
+			mouseX = 0;
+			mouseY = 0;
+		}
+		float yChange = space - shift + rTrig - lTrig;
+		float zChange = wKey - sKey + LYStick;
+		float xChange = dKey - aKey + LXStick;
+		GW::MATH::GVECTORF trans = { 0, yChange * frameSpeed, 0 };
+		//std::cout << yChange << ", " << cameraSpeed<<", " << timer.count() << std::endl;
+		proxy.TranslateGlobalF(tempCam, trans, tempCam);
+		trans = { xChange * frameSpeed, 0 , zChange * frameSpeed };
+		proxy.TranslateLocalF(tempCam, trans, tempCam);
+		// TODO: Part 4e
+		// TODO: Part 4f
+		float totalPitch = 1.13446f * mouseY / 600 + RYStick;
+		float totalYaw = 1.13446f * aspect * mouseX / 800 + RXStick;
+		proxy.RotateXLocalF(tempCam, totalPitch, tempCam);
+		proxy.RotateYGlobalF(tempCam, totalYaw, tempCam);
+		// TODO: Part 4g
+		// TODO: Part 4c
+		proxy.InverseF(tempCam, camera);
 		start = std::chrono::steady_clock::now();
 	}
 

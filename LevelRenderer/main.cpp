@@ -3,6 +3,7 @@
 #define GATEWARE_ENABLE_SYSTEM // Graphics libs require system level libraries
 #define GATEWARE_ENABLE_GRAPHICS // Enables all Graphics Libraries
 #define GATEWARE_ENABLE_MATH
+#define GATEWARE_ENABLE_INPUT
 // TODO: Part 3a
 // Ignore some GRAPHICS libraries we aren't going to use
 #define GATEWARE_DISABLE_GDIRECTX11SURFACE // we have another template for this
@@ -64,6 +65,7 @@ int main()
 			{
 				if (+vulkan.StartFrame(2, clrAndDepth))
 				{
+					renderer.UpdateCamera();
 					renderer.Render();
 					vulkan.EndFrame(true);
 				}

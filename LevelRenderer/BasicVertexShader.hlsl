@@ -35,6 +35,7 @@ StructuredBuffer<SHADER_MODEL_DATA> SceneData;
 cbuffer MESH_INDEX
 {
     uint mesh_ID;
+    uint world_ID;
 };
 // TODO: Part 4a
 struct OUTPUT_TO_RASTERIZER
@@ -58,17 +59,17 @@ struct VERTEX_OUT
     float3 nrm : NORMAL;
 };
 // TODO: Part 4b
-OUTPUT_TO_RASTERIZER main(VERTEX inputVertex)
+OUTPUT_TO_RASTERIZER main(VERTEX inputVertex, int ID : SV_InstanceID)
 {
     OUTPUT_TO_RASTERIZER output;
     // TODO: Part 1h
 	//inputVertex.pos[2] += 0.75;
     //inputVertex.pos[1] -= 0.75;
 	// TODO: Part 2i
-    output.posW = mul(inputVertex.pos, SceneData[0].matricies[0]);
+    output.posW = mul(inputVertex.pos, SceneData[0].matricies[world_ID + ID]);
     output.posH = mul(float4(output.posW, 1), SceneData[0].viewMatrix);
     output.posH = mul(output.posH, SceneData[0].projectionMatrix);
-    output.nrmW = mul(inputVertex.nrm, SceneData[0].matricies[0]);
+    output.nrmW = mul(inputVertex.nrm, SceneData[0].matricies[world_ID + ID]);
     output.uvC = inputVertex.uvw;
 		// TODO: Part 4e
 	// TODO: Part 4b

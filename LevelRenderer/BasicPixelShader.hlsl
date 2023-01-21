@@ -32,6 +32,7 @@ StructuredBuffer<SHADER_MODEL_DATA> SceneData;
 cbuffer MESH_INDEX
 {
     uint mesh_ID;
+    uint world_ID;
 };
 struct OUTPUT_TO_RASTERIZER
 {
