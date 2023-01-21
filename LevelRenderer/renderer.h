@@ -91,6 +91,10 @@ class Renderer
 	// TODO: Part 2b
 	SHADER_MODEL_DATA sceneData;
 	Push_Constants pushConstants;
+
+	unsigned indexOffset = 0;
+	unsigned vertexOffset = 0;
+	unsigned materialOffset = 0;
 	// TODO: Part 4g
 public:
 
@@ -446,9 +450,10 @@ public:
 		GvkHelper::write_to_buffer(device, storageData[currentImage], &sceneData, sizeof(SHADER_MODEL_DATA));
 		// TODO: Part 2i
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet[currentImage], 0, nullptr);
-		unsigned indexOffset = 0;
-		unsigned vertexOffset = 0;
-		unsigned materialOffset = 0;
+
+		indexOffset = 0;
+		vertexOffset = 0;
+		materialOffset = 0;
 		for (size_t j = 0; j < levelData.levelModels.size(); j++)
 		{
 			pushConstants.startWorld = levelData.levelInstances[j].transformStart;
@@ -466,7 +471,7 @@ public:
 	}
 
 	void UpdateCamera() {
-		const float cameraSpeed = 0.3;
+		const float cameraSpeed = 0.5;
 		auto end = std::chrono::steady_clock::now();
 		std::chrono::duration<float> timer = end - start;
 		float frameSpeed = cameraSpeed * timer.count();
@@ -509,7 +514,7 @@ public:
 		float zChange = wKey - sKey + LYStick;
 		float xChange = dKey - aKey + LXStick;
 		GW::MATH::GVECTORF trans = { 0, yChange * frameSpeed, 0 };
-		//std::cout << yChange << ", " << cameraSpeed<<", " << timer.count() << std::endl;
+		
 		proxy.TranslateGlobalF(tempCam, trans, tempCam);
 		trans = { xChange * frameSpeed, 0 , zChange * frameSpeed };
 		proxy.TranslateLocalF(tempCam, trans, tempCam);
