@@ -90,8 +90,6 @@ private:
 	{
 		std::string modelFile; // path to .h2b file
 		std::vector<GW::MATH::GMATRIXF> instances; // where to draw
-		H2B::Parser parser;
-		unsigned meshID;
 	};
 	// internal helper for reading the game level
 	bool ReadGameLevel(const char* gameLevelPath, 
@@ -133,12 +131,6 @@ private:
 				loc += std::to_string(transform.row4.x) + " Y " +
 					std::to_string(transform.row4.y) + " Z " + std::to_string(transform.row4.z);
 				log.LogCategorized("INFO", loc.c_str());
-
-				// Create h2b parsed data
-				add.parser.Parse(add.modelFile.c_str()); 
-
-				// Set the meshID
-				add.meshID = levelTransforms.size();
 
 				// does this model already exist?
 				auto found = outModels.find(add.modelFile);

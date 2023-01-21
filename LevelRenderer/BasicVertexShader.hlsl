@@ -16,11 +16,12 @@ struct _OBJ_ATTRIBUTES_
     float3 Ke; // emissive reflectivity
     uint illum; // illumination model
 } OBJ_ATTRIBUTES;
-#define MAX_SUBMESH_PER_DRAW 1024 // we can change this if desired
+#define MAX_SUBMESH_PER_DRAW 1054 // we can change this if desired
 struct SHADER_MODEL_DATA
 {
 		//gloabally shared model data
     float3 sunDirection, sunColor; // lighting info
+    float3 sunAmbient, cameraPos;
     matrix viewMatrix, projectionMatrix; // viewing info
 		// per sub-mesh transform and material data
     matrix matricies[MAX_SUBMESH_PER_DRAW]; // world space transforms

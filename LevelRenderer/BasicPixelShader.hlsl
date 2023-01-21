@@ -16,7 +16,7 @@ struct _OBJ_ATTRIBUTES_
 #define MAX_SUBMESH_PER_DRAW 1054 // we can change this if desired
 struct SHADER_MODEL_DATA
 {
-		//gloabally shared model data
+	    //gloabally shared model data
     float3 sunDirection, sunColor; // lighting info
     float3 sunAmbient, cameraPos;
     matrix viewMatrix, projectionMatrix; // viewing info

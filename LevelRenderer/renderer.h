@@ -2,6 +2,7 @@
 // TODO: Part 1b
 #include "shaderc/shaderc.h" // needed for compiling shaders at runtime
 #include "FSLogo.h"
+#include "load_data_oriented.h"
 #ifdef _WIN32 // must use MT platform DLL libraries on windows
 #pragma comment(lib, "shaderc_combined.lib") 
 #endif
@@ -40,12 +41,13 @@ class Renderer
 		GW::MATH::GMATRIXF viewMatrix, projectionMatrix; // viewing info
 		// per sub-mesh transform and material data
 		GW::MATH::GMATRIXF matricies[MAX_SUBMESH_PER_DRAW]; // world space transforms
-		OBJ_ATTRIBUTES materials[MAX_SUBMESH_PER_DRAW]; // color/texture of surface
+		H2B::ATTRIBUTES materials[MAX_SUBMESH_PER_DRAW]; // color/texture of surface
 	};
 	// proxy handles
 	GW::SYSTEM::GWindow win;
 	GW::GRAPHICS::GVulkanSurface vlk;
 	GW::CORE::GEventReceiver shutdown;
+	Level_Data levelData;
 
 	// what we need at a minimum to draw a triangle
 	VkDevice device = nullptr;
@@ -78,17 +80,18 @@ class Renderer
 	GW::MATH::GMATRIXF world = GW::MATH::GIdentityMatrixF;
 	std::chrono::steady_clock::time_point start;
 	GW::MATH::GVECTORF lightDir = { -1, -1, 2 };
-	GW::MATH::GVECTORF lightClr = { 0.9, 0.9, 1.0, 1.0 };
+	GW::MATH::GVECTORF lightClr = { 0.9, 0.9, 1.0};
 	// TODO: Part 2b
 	SHADER_MODEL_DATA sceneData;
 	// TODO: Part 4g
 public:
 
-	Renderer(GW::SYSTEM::GWindow _win, GW::GRAPHICS::GVulkanSurface _vlk)
+	Renderer(GW::SYSTEM::GWindow _win, GW::GRAPHICS::GVulkanSurface _vlk, Level_Data _levelData)
 	{
 		start = std::chrono::steady_clock::now();
 		win = _win;
 		vlk = _vlk;
+		levelData = _levelData;
 		unsigned int width, height;
 		win.GetClientWidth(width);
 		win.GetClientHeight(height);
@@ -112,9 +115,13 @@ public:
 
 		// TODO: Part 4g
 		// TODO: part 3b
-		for (int i = 0; i < 2; ++i) {
-			sceneData.materials[i] = FSLogo_materials[i].attrib;
+		for (int i = 0; i < levelData.levelMaterials.size(); ++i) {
+			sceneData.materials[i] = levelData.levelMaterials[i].attrib;
 		}
+		/*for (int i = 0; i < levelData.levelTransforms.size(); ++i) {
+			sceneData.matricies[i] = levelData.levelTransforms[i];
+		}*/
+		//sceneData.matricies[0] = GW::MATH::GIdentityMatrixF;
 
 		/***************** GEOMETRY INTIALIZATION ******************/
 		// Grab the device & physical device so we can allocate some stuff
@@ -122,23 +129,18 @@ public:
 		vlk.GetDevice((void**)&device);
 		vlk.GetPhysicalDevice((void**)&physicalDevice);
 
-		// TODO: Part 1c
-		// Create Vertex Buffer
-		float verts[] = {
-			   0,   0.5f,
-			 0.5f, -0.5f,
-			-0.5f, -0.5f
-		};
 		// Transfer triangle data to the vertex buffer. (staging would be prefered here)
-		GvkHelper::create_buffer(physicalDevice, device, sizeof(FSLogo_vertices),
+		unsigned vertexSize = levelData.levelVertices.size() * sizeof(H2B::VERTEX);
+		GvkHelper::create_buffer(physicalDevice, device, vertexSize,
 			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
 			VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &vertexHandle, &vertexData);
-		GvkHelper::write_to_buffer(device, vertexData, FSLogo_vertices, sizeof(FSLogo_vertices));
+		GvkHelper::write_to_buffer(device, vertexData, levelData.levelVertices.data(), vertexSize);
 		// TODO: Part 1g
-		GvkHelper::create_buffer(physicalDevice, device, sizeof(FSLogo_indices),
+		unsigned indexSize = levelData.levelIndices.size() * sizeof(unsigned);
+		GvkHelper::create_buffer(physicalDevice, device, indexSize,
 			VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
 			VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &indexHandle, &indexData);
-		GvkHelper::write_to_buffer(device, indexData, FSLogo_indices, sizeof(FSLogo_indices));
+		GvkHelper::write_to_buffer(device, indexData, levelData.levelIndices.data(), indexSize);
 		// TODO: Part 2d
 		UINT32 numBBS = 0;
 		vlk.GetSwapchainImageCount(numBBS);
@@ -207,7 +209,7 @@ public:
 		// Vertex Input State
 		VkVertexInputBindingDescription vertex_binding_description = {};
 		vertex_binding_description.binding = 0;
-		vertex_binding_description.stride = sizeof(_OBJ_VERT_);
+		vertex_binding_description.stride = sizeof(H2B::VERTEX);
 		vertex_binding_description.inputRate = VK_VERTEX_INPUT_RATE_VERTEX;
 		VkVertexInputAttributeDescription vertex_attribute_description[3] = {
 			{ 0, 0, VK_FORMAT_R32G32B32_SFLOAT, 0 }, //uv, normal, etc....
@@ -359,8 +361,8 @@ public:
 		// TODO: Part 3c
 		VkPushConstantRange push_constant_range = {};
 		push_constant_range.offset = 0;
-		push_constant_range.size = sizeof(UINT);
-		push_constant_range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT + VK_SHADER_STAGE_FRAGMENT_BIT;
+		push_constant_range.size = sizeof(unsigned);
+		push_constant_range.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
 
 		pipeline_layout_create_info.pushConstantRangeCount = 1;
 		pipeline_layout_create_info.pPushConstantRanges = &push_constant_range;
@@ -401,7 +403,7 @@ public:
 		std::chrono::duration<float> timer = end - start;
 		proxy.RotateYLocalF(world, 0.5 * timer.count(), world);
 		// TODO: Part 4d
-		sceneData.matricies[1] = world;
+		//sceneData.matricies[1] = world;
 		// grab the current Vulkan commandBuffer
 		unsigned int currentBuffer;
 		vlk.GetSwapchainCurrentImage(currentBuffer);
@@ -428,16 +430,17 @@ public:
 		// TODO: Part 4d
 		UINT32 currentImage = 0;
 		vlk.GetSwapchainCurrentImage(currentImage);
-		VkResult test =  GvkHelper::write_to_buffer(device, storageData[currentImage], &sceneData, sizeof(SHADER_MODEL_DATA));
+		GvkHelper::write_to_buffer(device, storageData[currentImage], &sceneData, sizeof(SHADER_MODEL_DATA));
 		// TODO: Part 2i
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet[currentImage], 0, nullptr);
-		// TODO: Part 3b
-		for (int i = 0; i < 2; ++i) {
-			vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT + VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(UINT), &FSLogo_meshes[i].materialIndex);
-			vkCmdDrawIndexed(commandBuffer, FSLogo_meshes[i].indexCount, 1, FSLogo_meshes[i].indexOffset, 0, 0);
+		for (size_t j = 0; j < 1; j++)
+		{
+			for (int i = levelData.levelModels[j].meshStart; i < levelData.levelModels[j].meshCount + levelData.levelModels[j].meshStart; ++i) {
+				vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(unsigned), &levelData.levelMeshes[i].materialIndex);
+				vkCmdDrawIndexed(commandBuffer, levelData.levelMeshes[i].drawInfo.indexCount, 1, levelData.levelMeshes[i].drawInfo.indexOffset, 0, 0);
+			}
 		}
-		// TODO: Part 3d
-		//vkCmdDrawIndexed(commandBuffer, 8532, 1, 0, 0, 0); // TODO: Part 1d, 1h
+
 		start = std::chrono::steady_clock::now();
 	}
 

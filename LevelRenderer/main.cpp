@@ -12,7 +12,7 @@
 // With what we want & what we don't defined we can include the API
 #include "../Gateware/Gateware.h"
 #include "renderer.h"
-#include "load_data_oriented.h"
+//#include "load_data_oriented.h"
 // open some namespaces to compact the code a bit
 using namespace GW;
 using namespace CORE;
@@ -59,7 +59,7 @@ int main()
 		if (+vulkan.Create(win, GW::GRAPHICS::DEPTH_BUFFER_SUPPORT))
 #endif
 		{
-			Renderer renderer(win, vulkan);
+			Renderer renderer(win, vulkan, dataOrientedLoader);
 			while (+win.ProcessWindowEvents())
 			{
 				if (+vulkan.StartFrame(2, clrAndDepth))
