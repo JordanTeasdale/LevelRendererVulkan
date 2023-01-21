@@ -12,6 +12,7 @@
 // With what we want & what we don't defined we can include the API
 #include "../Gateware/Gateware.h"
 #include "renderer.h"
+#include "load_data_oriented.h"
 // open some namespaces to compact the code a bit
 using namespace GW;
 using namespace CORE;
@@ -20,6 +21,15 @@ using namespace GRAPHICS;
 // lets pop a window and use Vulkan to clear to a red screen
 int main()
 {
+	GW::SYSTEM::GLog log; // handy for logging any messages/warning/errors
+	// begin loading level
+	log.Create("../LevelLoaderLog.txt");
+	log.EnableConsoleLogging(true); // mirror output to the console
+	log.Log("Start Program.");
+
+	Level_Data dataOrientedLoader;
+	dataOrientedLoader.LoadLevel("../Levels/SmallTest1.txt", "../ModelsOBJ", log);
+
 	GWindow win;
 	GEventResponder msgs;
 	GVulkanSurface vulkan;

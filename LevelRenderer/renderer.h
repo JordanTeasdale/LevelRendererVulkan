@@ -5,158 +5,29 @@
 #ifdef _WIN32 // must use MT platform DLL libraries on windows
 #pragma comment(lib, "shaderc_combined.lib") 
 #endif
-// Simple Vertex Shader
-const char* vertexShaderSource = R"(
-// TODO: 2i
-#pragma	pack_matrix(row_major)
-// an ultra simple hlsl vertex shader
-// TODO: Part 2b
-typedef
-struct _OBJ_ATTRIBUTES_
-{
-    float3 Kd; // diffuse reflectivity
-    float d; // dissolve (transparency) 
-    float3 Ks; // specular reflectivity
-    float Ns; // specular exponent
-    float3 Ka; // ambient reflectivity
-    float sharpness; // local reflection map sharpness
-    float3 Tf; // transmission filter
-    float Ni; // optical density (index of refraction)
-    float3 Ke; // emissive reflectivity
-    uint illum; // illumination model
-} OBJ_ATTRIBUTES;
-#define MAX_SUBMESH_PER_DRAW 1054 // we can change this if desired
-struct SHADER_MODEL_DATA
-{
-		//gloabally shared model data
-    float3 sunDirection, sunColor; // lighting info
-	float3 sunAmbient, cameraPos;
-    matrix viewMatrix, projectionMatrix; // viewing info
-		// per sub-mesh transform and material data
-    matrix matricies[MAX_SUBMESH_PER_DRAW]; // world space transforms
-    OBJ_ATTRIBUTES materials[MAX_SUBMESH_PER_DRAW]; // color/texture of surface
-};
-StructuredBuffer<SHADER_MODEL_DATA> SceneData;
-// TODO: Part 4g
-// TODO: Part 2i
-// TODO: Part 3e
-[[vk::push_constant]]
-cbuffer MESH_INDEX
-{
-    uint mesh_ID;
-};
-// TODO: Part 4a
-struct OUTPUT_TO_RASTERIZER
-{
-    float4 posH : SV_POSITION; // homogenous projection space
-    float3 nrmW : NORMAL; // normal in world space (for lighting)
-    float3 posW : WORLD; // position in world space (for lighting)
-    float2 uvC : UV; // uv cooridinate for textures
-};
-// TODO: Part 1f
-struct VERTEX
-{
-    float3 pos : POSITION;
-    float3 uvw : COLOR;
-    float3 nrm : NORMAL;
-};
-struct VERTEX_OUT
-{
-    float4 pos : SV_POSITION;
-    float2 uv : COLOR;
-    float3 nrm : NORMAL;
-};
-// TODO: Part 4b
-OUTPUT_TO_RASTERIZER main(VERTEX inputVertex)
-{
-    OUTPUT_TO_RASTERIZER output;
-    // TODO: Part 1h
-	//inputVertex.pos[2] += 0.75;
-    //inputVertex.pos[1] -= 0.75;
-	// TODO: Part 2i
-    
-		// TODO: Part 4e
-	output.posW = mul(inputVertex.pos, SceneData[0].matricies[mesh_ID]);
-    output.posH = mul(float4(output.posW, 1), SceneData[0].viewMatrix);
-    output.posH = mul(output.posH, SceneData[0].projectionMatrix);
-    output.nrmW = mul(inputVertex.nrm, SceneData[0].matricies[mesh_ID]);
-    output.uvC = inputVertex.uvw;
-	// TODO: Part 4b
-		// TODO: Part 4e
-    return output;
+// Imports Shader from External Files
+std::string ShaderAsString(const char* shaderFilePath) {
+	std::string output;
+	unsigned int stringLength = 0;
+	GW::SYSTEM::GFile file; file.Create();
+	file.GetFileSize(shaderFilePath, stringLength);
+	if (stringLength && +file.OpenBinaryRead(shaderFilePath)) {
+		output.resize(stringLength);
+		file.Read(&output[0], stringLength);
+	}
+	else
+		std::cout << "ERROR: Shader Source File \"" << shaderFilePath << "\" Not Found!" << std::endl;
+	return output;
 }
-)";
-// Simple Pixel Shader
-const char* pixelShaderSource = R"(
-// TODO: Part 2b
-typedef
-struct _OBJ_ATTRIBUTES_
-{
-    float3 Kd; // diffuse reflectivity
-    float d; // dissolve (transparency) 
-    float3 Ks; // specular reflectivity
-    float Ns; // specular exponent
-    float3 Ka; // ambient reflectivity
-    float sharpness; // local reflection map sharpness
-    float3 Tf; // transmission filter
-    float Ni; // optical density (index of refraction)
-    float3 Ke; // emissive reflectivity
-    uint illum; // illumination model
-} OBJ_ATTRIBUTES;
-#define MAX_SUBMESH_PER_DRAW 1054 // we can change this if desired
-struct SHADER_MODEL_DATA
-{
-		//gloabally shared model data
-    float3 sunDirection, sunColor; // lighting info
-	float3 sunAmbient, cameraPos;
-    matrix viewMatrix, projectionMatrix; // viewing info
-		// per sub-mesh transform and material data
-    matrix matricies[MAX_SUBMESH_PER_DRAW]; // world space transforms
-    OBJ_ATTRIBUTES materials[MAX_SUBMESH_PER_DRAW]; // color/texture of surface
-};
-StructuredBuffer<SHADER_MODEL_DATA> SceneData;
-// TODO: Part 4g
-// TODO: Part 2i
-// TODO: Part 3e
-[[vk::push_constant]]
-cbuffer MESH_INDEX
-{
-    uint mesh_ID;
-};
-struct OUTPUT_TO_RASTERIZER
-{
-    float4 posH : SV_POSITION; // homogenous projection space
-    float3 nrmW : NORMAL; // normal in world space (for lighting)
-    float3 posW : WORLD; // position in world space (for lighting)
-    float2 uvC : UV; // uv cooridinate for textures
-};
-// an ultra simple hlsl pixel shader
-// TODO: Part 4b
-float4 main(OUTPUT_TO_RASTERIZER inputVertex) : SV_TARGET
-{
-	//return float4(0.75f ,0, 0, 0); // TODO: Part 1a
-	// TODO: Part 3a
-    float4 matColor = float4(SceneData[0].materials[mesh_ID].Kd, 1);
-	// TODO: Part 4c
-    // Diffuse and Ambient lights
-    float3 normalizedNRM = normalize(inputVertex.nrmW);
-    float lightRatio = saturate(dot(normalize(-SceneData[0].sunDirection), normalizedNRM));
-    float3 directColor = (lightRatio * SceneData[0].sunColor);
-    float3 indirectColor = SceneData[0].sunAmbient * SceneData[0].materials[mesh_ID].Ka;
-    // Specular Light
-    float3 viewDir = normalize(SceneData[0].cameraPos - inputVertex.posW);
-    float3 halfVec = normalize(normalize(-SceneData[0].sunDirection) + viewDir);
-    float intensity = max(pow(saturate(dot(inputVertex.nrmW, halfVec)), SceneData[0].materials[mesh_ID].Ns), 0);
-    float4 reflectedLight = intensity * float4(SceneData[0].materials[mesh_ID].Ks, 1);
-    
-    //float4 finalColor = diffuseColor + reflectedLight;
-    //return float4(saturate(directColor + indirectColor), 1);
-    return (float4(saturate(directColor + indirectColor), 1) * matColor) + reflectedLight;
-	// TODO: Part 4g (half-vector or reflect method your choice)
-    //return finalColor;
 
-}
-)";
+// Simple Vertex Shader
+std::string vertexString = ShaderAsString("../BasicVertexShader.hlsl");
+const char* vertexShaderSource = vertexString.c_str();
+
+// Simple Pixel Shader
+std::string fragmentString = ShaderAsString("../BasicPixelShader.hlsl");
+const char* pixelShaderSource = fragmentString.c_str();
+
 // Creation, Rendering & Cleanup
 class Renderer
 {
