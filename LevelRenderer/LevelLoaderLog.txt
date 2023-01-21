@@ -922,3 +922,100 @@
 [Sat Jan 21 11:48:22 2023] ThreadID[26508]	[INFO]	H2B Imported: Mountain_Group_2_Cube.h2b
 [Sat Jan 21 11:48:22 2023] ThreadID[26508]	[MESSAGE]	Importing of .H2B File Data Complete.
 [Sat Jan 21 11:48:22 2023] ThreadID[26508]	[EVENT]	GAME LEVEL WAS LOADED TO CPU [DATA ORIENTED]
+[Sat Jan 21 11:52:09 2023] ThreadID[39564]	Start Program.
+[Sat Jan 21 11:52:09 2023] ThreadID[39564]	[EVENT]	LOADING GAME LEVEL [DATA ORIENTED]
+[Sat Jan 21 11:52:09 2023] ThreadID[39564]	[MESSAGE]	Begin Reading Game Level Text File.
+[Sat Jan 21 11:52:09 2023] ThreadID[39564]	[INFO]	Model Detected: Mountain_Group_1_Cube.039
+[Sat Jan 21 11:52:09 2023] ThreadID[39564]	[INFO]	Location: X -1.736400 Y -0.000000 Z 3.566200
+[Sat Jan 21 11:52:09 2023] ThreadID[39564]	[INFO]	Model Detected: Mountain_Group_2_Cube.044
+[Sat Jan 21 11:52:09 2023] ThreadID[39564]	[INFO]	Location: X 3.515900 Y 0.000000 Z 4.475500
+[Sat Jan 21 11:52:09 2023] ThreadID[39564]	[INFO]	Model Detected: Mountain_Group_2_Cube.001
+[Sat Jan 21 11:52:09 2023] ThreadID[39564]	[INFO]	Location: X 2.443800 Y -0.000000 Z 0.889500
+[Sat Jan 21 11:52:09 2023] ThreadID[39564]	[INFO]	Model Detected: Archery_FirstAge_Level1_Cube.295
+[Sat Jan 21 11:52:09 2023] ThreadID[39564]	[INFO]	Location: X -0.282200 Y 0.000000 Z -1.207100
+[Sat Jan 21 11:52:09 2023] ThreadID[39564]	[MESSAGE]	Game Level File Reading Complete.
+[Sat Jan 21 11:52:09 2023] ThreadID[39564]	[MESSAGE]	Begin Importing .H2B File Data.
+[Sat Jan 21 11:52:09 2023] ThreadID[39564]	[INFO]	H2B Imported: Archery_FirstAge_Level1_Cube.h2b
+[Sat Jan 21 11:53:37 2023] ThreadID[2440]	Start Program.
+[Sat Jan 21 11:53:37 2023] ThreadID[2440]	[EVENT]	LOADING GAME LEVEL [DATA ORIENTED]
+[Sat Jan 21 11:53:37 2023] ThreadID[2440]	[MESSAGE]	Begin Reading Game Level Text File.
+[Sat Jan 21 11:53:37 2023] ThreadID[2440]	[INFO]	Model Detected: Mountain_Group_1_Cube.039
+[Sat Jan 21 11:53:37 2023] ThreadID[2440]	[INFO]	Location: X -1.736400 Y -0.000000 Z 3.566200
+[Sat Jan 21 11:53:37 2023] ThreadID[2440]	[INFO]	Model Detected: Mountain_Group_2_Cube.044
+[Sat Jan 21 11:53:37 2023] ThreadID[2440]	[INFO]	Location: X 3.515900 Y 0.000000 Z 4.475500
+[Sat Jan 21 11:53:37 2023] ThreadID[2440]	[INFO]	Model Detected: Mountain_Group_2_Cube.001
+[Sat Jan 21 11:53:37 2023] ThreadID[2440]	[INFO]	Location: X 2.443800 Y -0.000000 Z 0.889500
+[Sat Jan 21 11:53:37 2023] ThreadID[2440]	[INFO]	Model Detected: Archery_FirstAge_Level1_Cube.295
+[Sat Jan 21 11:53:37 2023] ThreadID[2440]	[INFO]	Location: X -0.282200 Y 0.000000 Z -1.207100
+[Sat Jan 21 11:56:08 2023] ThreadID[41832]	Start Program.
+[Sat Jan 21 11:56:08 2023] ThreadID[41832]	[EVENT]	LOADING GAME LEVEL [DATA ORIENTED]
+[Sat Jan 21 11:56:08 2023] ThreadID[41832]	[MESSAGE]	Begin Reading Game Level Text File.
+[Sat Jan 21 11:56:08 2023] ThreadID[41832]	[INFO]	Model Detected: Mountain_Group_1_Cube.039
+[Sat Jan 21 11:56:08 2023] ThreadID[41832]	[INFO]	Location: X -1.736400 Y -0.000000 Z 3.566200
+[Sat Jan 21 11:56:08 2023] ThreadID[41832]	[INFO]	Model Detected: Mountain_Group_2_Cube.044
+[Sat Jan 21 11:56:08 2023] ThreadID[41832]	[INFO]	Location: X 3.515900 Y 0.000000 Z 4.475500
+[Sat Jan 21 11:56:08 2023] ThreadID[41832]	[INFO]	Model Detected: Mountain_Group_2_Cube.001
+[Sat Jan 21 11:56:08 2023] ThreadID[41832]	[INFO]	Location: X 2.443800 Y -0.000000 Z 0.889500
+[Sat Jan 21 11:56:08 2023] ThreadID[41832]	[INFO]	Model Detected: Archery_FirstAge_Level1_Cube.295
+[Sat Jan 21 11:56:08 2023] ThreadID[41832]	[INFO]	Location: X -0.282200 Y 0.000000 Z -1.207100
+[Sat Jan 21 11:56:08 2023] ThreadID[41832]	[MESSAGE]	Game Level File Reading Complete.
+[Sat Jan 21 11:56:08 2023] ThreadID[41832]	[MESSAGE]	Begin Importing .H2B File Data.
+[Sat Jan 21 11:56:08 2023] ThreadID[41832]	[INFO]	H2B Imported: Archery_FirstAge_Level1_Cube.h2b
+[Sat Jan 21 11:56:08 2023] ThreadID[41832]	[INFO]	H2B Imported: Mountain_Group_1_Cube.h2b
+[Sat Jan 21 11:56:08 2023] ThreadID[41832]	[INFO]	H2B Imported: Mountain_Group_2_Cube.h2b
+[Sat Jan 21 11:56:08 2023] ThreadID[41832]	[MESSAGE]	Importing of .H2B File Data Complete.
+[Sat Jan 21 11:56:08 2023] ThreadID[41832]	[EVENT]	GAME LEVEL WAS LOADED TO CPU [DATA ORIENTED]
+[Sat Jan 21 11:56:34 2023] ThreadID[37712]	Start Program.
+[Sat Jan 21 11:56:34 2023] ThreadID[37712]	[EVENT]	LOADING GAME LEVEL [DATA ORIENTED]
+[Sat Jan 21 11:56:34 2023] ThreadID[37712]	[MESSAGE]	Begin Reading Game Level Text File.
+[Sat Jan 21 11:56:34 2023] ThreadID[37712]	[INFO]	Model Detected: Mountain_Group_1_Cube.039
+[Sat Jan 21 11:56:34 2023] ThreadID[37712]	[INFO]	Location: X -1.736400 Y -0.000000 Z 3.566200
+[Sat Jan 21 11:56:34 2023] ThreadID[37712]	[INFO]	Model Detected: Mountain_Group_2_Cube.044
+[Sat Jan 21 11:56:34 2023] ThreadID[37712]	[INFO]	Location: X 3.515900 Y 0.000000 Z 4.475500
+[Sat Jan 21 11:56:34 2023] ThreadID[37712]	[INFO]	Model Detected: Mountain_Group_2_Cube.001
+[Sat Jan 21 11:56:34 2023] ThreadID[37712]	[INFO]	Location: X 2.443800 Y -0.000000 Z 0.889500
+[Sat Jan 21 11:56:34 2023] ThreadID[37712]	[INFO]	Model Detected: Archery_FirstAge_Level1_Cube.295
+[Sat Jan 21 11:56:34 2023] ThreadID[37712]	[INFO]	Location: X -0.282200 Y 0.000000 Z -1.207100
+[Sat Jan 21 11:56:34 2023] ThreadID[37712]	[MESSAGE]	Game Level File Reading Complete.
+[Sat Jan 21 11:56:34 2023] ThreadID[37712]	[MESSAGE]	Begin Importing .H2B File Data.
+[Sat Jan 21 11:56:34 2023] ThreadID[37712]	[INFO]	H2B Imported: Archery_FirstAge_Level1_Cube.h2b
+[Sat Jan 21 11:56:34 2023] ThreadID[37712]	[INFO]	H2B Imported: Mountain_Group_1_Cube.h2b
+[Sat Jan 21 11:56:34 2023] ThreadID[37712]	[INFO]	H2B Imported: Mountain_Group_2_Cube.h2b
+[Sat Jan 21 11:56:34 2023] ThreadID[37712]	[MESSAGE]	Importing of .H2B File Data Complete.
+[Sat Jan 21 11:56:34 2023] ThreadID[37712]	[EVENT]	GAME LEVEL WAS LOADED TO CPU [DATA ORIENTED]
+[Sat Jan 21 12:01:42 2023] ThreadID[21860]	Start Program.
+[Sat Jan 21 12:01:42 2023] ThreadID[21860]	[EVENT]	LOADING GAME LEVEL [DATA ORIENTED]
+[Sat Jan 21 12:01:42 2023] ThreadID[21860]	[MESSAGE]	Begin Reading Game Level Text File.
+[Sat Jan 21 12:01:42 2023] ThreadID[21860]	[INFO]	Model Detected: Mountain_Group_1_Cube.039
+[Sat Jan 21 12:01:42 2023] ThreadID[21860]	[INFO]	Location: X -1.736400 Y -0.000000 Z 3.566200
+[Sat Jan 21 12:01:42 2023] ThreadID[21860]	[INFO]	Model Detected: Mountain_Group_2_Cube.044
+[Sat Jan 21 12:01:42 2023] ThreadID[21860]	[INFO]	Location: X 3.515900 Y 0.000000 Z 4.475500
+[Sat Jan 21 12:01:42 2023] ThreadID[21860]	[INFO]	Model Detected: Mountain_Group_2_Cube.001
+[Sat Jan 21 12:01:42 2023] ThreadID[21860]	[INFO]	Location: X 2.443800 Y -0.000000 Z 0.889500
+[Sat Jan 21 12:01:42 2023] ThreadID[21860]	[INFO]	Model Detected: Archery_FirstAge_Level1_Cube.295
+[Sat Jan 21 12:01:42 2023] ThreadID[21860]	[INFO]	Location: X -0.282200 Y 0.000000 Z -1.207100
+[Sat Jan 21 12:01:42 2023] ThreadID[21860]	[MESSAGE]	Game Level File Reading Complete.
+[Sat Jan 21 12:01:42 2023] ThreadID[21860]	[MESSAGE]	Begin Importing .H2B File Data.
+[Sat Jan 21 12:01:42 2023] ThreadID[21860]	[INFO]	H2B Imported: Archery_FirstAge_Level1_Cube.h2b
+[Sat Jan 21 12:01:42 2023] ThreadID[21860]	[INFO]	H2B Imported: Mountain_Group_1_Cube.h2b
+[Sat Jan 21 12:01:42 2023] ThreadID[21860]	[INFO]	H2B Imported: Mountain_Group_2_Cube.h2b
+[Sat Jan 21 12:01:42 2023] ThreadID[21860]	[MESSAGE]	Importing of .H2B File Data Complete.
+[Sat Jan 21 12:01:42 2023] ThreadID[21860]	[EVENT]	GAME LEVEL WAS LOADED TO CPU [DATA ORIENTED]
+[Sat Jan 21 12:02:00 2023] ThreadID[35032]	Start Program.
+[Sat Jan 21 12:02:00 2023] ThreadID[35032]	[EVENT]	LOADING GAME LEVEL [DATA ORIENTED]
+[Sat Jan 21 12:02:00 2023] ThreadID[35032]	[MESSAGE]	Begin Reading Game Level Text File.
+[Sat Jan 21 12:02:00 2023] ThreadID[35032]	[INFO]	Model Detected: Mountain_Group_1_Cube.039
+[Sat Jan 21 12:02:00 2023] ThreadID[35032]	[INFO]	Location: X -1.736400 Y -0.000000 Z 3.566200
+[Sat Jan 21 12:02:00 2023] ThreadID[35032]	[INFO]	Model Detected: Mountain_Group_2_Cube.044
+[Sat Jan 21 12:02:00 2023] ThreadID[35032]	[INFO]	Location: X 3.515900 Y 0.000000 Z 4.475500
+[Sat Jan 21 12:02:00 2023] ThreadID[35032]	[INFO]	Model Detected: Mountain_Group_2_Cube.001
+[Sat Jan 21 12:02:00 2023] ThreadID[35032]	[INFO]	Location: X 2.443800 Y -0.000000 Z 0.889500
+[Sat Jan 21 12:02:00 2023] ThreadID[35032]	[INFO]	Model Detected: Archery_FirstAge_Level1_Cube.295
+[Sat Jan 21 12:02:00 2023] ThreadID[35032]	[INFO]	Location: X -0.282200 Y 0.000000 Z -1.207100
+[Sat Jan 21 12:02:00 2023] ThreadID[35032]	[MESSAGE]	Game Level File Reading Complete.
+[Sat Jan 21 12:02:00 2023] ThreadID[35032]	[MESSAGE]	Begin Importing .H2B File Data.
+[Sat Jan 21 12:02:00 2023] ThreadID[35032]	[INFO]	H2B Imported: Archery_FirstAge_Level1_Cube.h2b
+[Sat Jan 21 12:02:00 2023] ThreadID[35032]	[INFO]	H2B Imported: Mountain_Group_1_Cube.h2b
+[Sat Jan 21 12:02:00 2023] ThreadID[35032]	[INFO]	H2B Imported: Mountain_Group_2_Cube.h2b
+[Sat Jan 21 12:02:00 2023] ThreadID[35032]	[MESSAGE]	Importing of .H2B File Data Complete.
+[Sat Jan 21 12:02:00 2023] ThreadID[35032]	[EVENT]	GAME LEVEL WAS LOADED TO CPU [DATA ORIENTED]

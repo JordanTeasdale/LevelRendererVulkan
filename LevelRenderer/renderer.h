@@ -433,12 +433,16 @@ public:
 		GvkHelper::write_to_buffer(device, storageData[currentImage], &sceneData, sizeof(SHADER_MODEL_DATA));
 		// TODO: Part 2i
 		vkCmdBindDescriptorSets(commandBuffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipelineLayout, 0, 1, &descriptorSet[currentImage], 0, nullptr);
-		for (size_t j = 0; j < 1; j++)
+		unsigned indexOffset = 0;
+		unsigned vertexOffset = 0;
+		for (size_t j = 0; j < levelData.levelModels.size(); j++)
 		{
 			for (int i = levelData.levelModels[j].meshStart; i < levelData.levelModels[j].meshCount + levelData.levelModels[j].meshStart; ++i) {
 				vkCmdPushConstants(commandBuffer, pipelineLayout, VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT, 0, sizeof(unsigned), &levelData.levelMeshes[i].materialIndex);
-				vkCmdDrawIndexed(commandBuffer, levelData.levelMeshes[i].drawInfo.indexCount, 1, levelData.levelMeshes[i].drawInfo.indexOffset, 0, 0);
+				vkCmdDrawIndexed(commandBuffer, levelData.levelMeshes[i].drawInfo.indexCount, 1, levelData.levelMeshes[i].drawInfo.indexOffset + indexOffset, vertexOffset, 0);
 			}
+			indexOffset += levelData.levelModels[j].indexCount;
+			vertexOffset += levelData.levelModels[j].vertexCount;
 		}
 
 		start = std::chrono::steady_clock::now();
