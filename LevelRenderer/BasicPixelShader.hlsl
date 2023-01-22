@@ -57,7 +57,7 @@ float4 main(OUTPUT_TO_RASTERIZER inputVertex) : SV_TARGET
     // Specular Light
     float3 viewDir = normalize(SceneData[0].cameraPos - inputVertex.posW);
     float3 halfVec = normalize(normalize(-SceneData[0].sunDirection) + viewDir);
-    float intensity = max(pow(saturate(dot(inputVertex.nrmW, halfVec)), SceneData[0].materials[mesh_ID].Ns), 0);
+    float intensity = max(pow(saturate(dot(normalizedNRM, halfVec)), SceneData[0].materials[mesh_ID].Ns), 0);
     float4 reflectedLight = intensity * float4(SceneData[0].materials[mesh_ID].Ks, 1);
     
     //float4 finalColor = diffuseColor + reflectedLight;

@@ -28,16 +28,14 @@ struct SHADER_MODEL_DATA
     OBJ_ATTRIBUTES materials[MAX_SUBMESH_PER_DRAW]; // color/texture of surface
 };
 StructuredBuffer<SHADER_MODEL_DATA> SceneData;
-// TODO: Part 4g
-// TODO: Part 2i
-// TODO: Part 3e
+
 [[vk::push_constant]]
 cbuffer MESH_INDEX
 {
     uint mesh_ID;
     uint world_ID;
 };
-// TODO: Part 4a
+
 struct OUTPUT_TO_RASTERIZER
 {
     float4 posH : SV_POSITION; // homogenous projection space
@@ -45,34 +43,21 @@ struct OUTPUT_TO_RASTERIZER
     float3 posW : WORLD; // position in world space (for lighting)
     float2 uvC : UV; // uv cooridinate for textures
 };
-// TODO: Part 1f
+
 struct VERTEX
 {
     float3 pos : POSITION;
     float3 uvw : COLOR;
     float3 nrm : NORMAL;
 };
-struct VERTEX_OUT
-{
-    float4 pos : SV_POSITION;
-    float2 uv : COLOR;
-    float3 nrm : NORMAL;
-};
-// TODO: Part 4b
 OUTPUT_TO_RASTERIZER main(VERTEX inputVertex, int ID : SV_InstanceID)
 {
     OUTPUT_TO_RASTERIZER output;
-    // TODO: Part 1h
-	//inputVertex.pos[2] += 0.75;
-    //inputVertex.pos[1] -= 0.75;
-	// TODO: Part 2i
-    output.posW = mul(inputVertex.pos, SceneData[0].matricies[world_ID + ID]);
+    output.posW = mul(float4(inputVertex.pos, 1), SceneData[0].matricies[world_ID + ID]).xyz;
     output.posH = mul(float4(output.posW, 1), SceneData[0].viewMatrix);
     output.posH = mul(output.posH, SceneData[0].projectionMatrix);
     output.nrmW = mul(inputVertex.nrm, SceneData[0].matricies[world_ID + ID]);
     output.uvC = inputVertex.uvw;
-		// TODO: Part 4e
-	// TODO: Part 4b
-		// TODO: Part 4e
+    
     return output;
 }
