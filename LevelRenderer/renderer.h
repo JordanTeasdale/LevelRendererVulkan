@@ -1,9 +1,9 @@
-// minimalistic code to draw a single triangle, this is not part of the API.
-// TODO: Part 1b
 #include "shaderc/shaderc.h" // needed for compiling shaders at runtime
 #include "FSLogo.h"
 #include "load_data_oriented.h"
 #ifdef _WIN32 // must use MT platform DLL libraries on windows
+#define KHRONOS_STATIC // must be defined if ktx libraries are built statically
+#include <ktxvulkan.h>
 #pragma comment(lib, "shaderc_combined.lib") 
 #endif
 // Imports Shader from External Files
@@ -29,10 +29,13 @@ const char* vertexShaderSource = vertexString.c_str();
 std::string fragmentString = ShaderAsString("../BasicPixelShader.hlsl");
 const char* pixelShaderSource = fragmentString.c_str();
 
+// Texture Pixel Shader
+std::string textureFragmentString = ShaderAsString("../TexturePixelShader.hlsl");
+const char* texturePixelShaderSource = textureFragmentString.c_str();
+
 // Creation, Rendering & Cleanup
 class Renderer
 {
-	// TODO: Part 2b
 #define MAX_SUBMESH_PER_DRAW 1054 // we can change this if desired
 	struct SHADER_MODEL_DATA {
 		//gloabally shared model data
@@ -56,30 +59,38 @@ class Renderer
 	GW::INPUT::GInput inputProxy;
 	GW::INPUT::GController controllerProxy;
 
-	// what we need at a minimum to draw a triangle
 	VkDevice device = nullptr;
 	VkBuffer vertexHandle = nullptr;
 	VkDeviceMemory vertexData = nullptr;
-	// TODO: Part 1g
+	
 	VkBuffer indexHandle = nullptr;
 	VkDeviceMemory indexData = nullptr;
-	// TODO: Part 2c
+	
 	std::vector<VkBuffer> storageHandle;
 	std::vector<VkDeviceMemory> storageData;
 	VkShaderModule vertexShader = nullptr;
 	VkShaderModule pixelShader = nullptr;
-	// pipeline settings for drawing (also required)
+	VkShaderModule texturePixelShader = nullptr;
+	
 	VkPipeline pipeline = nullptr;
 	VkPipelineLayout pipelineLayout = nullptr;
-	// TODO: Part 2e
+	
 	VkDescriptorSetLayout descriptorLayout = nullptr;
-	// TODO: Part 2f
 	VkDescriptorPool descriptorPool = nullptr;
-	// TODO: Part 2g
 	std::vector<VkDescriptorSet> descriptorSet;
-	// TODO: Part 4f
 
-// TODO: Part 2a
+	/***************** KTX+VULKAN TEXTURING VARIABLES ******************/
+
+	// what we need at minimum to load/apply one texture
+	ktxVulkanTexture texture; // one per texture
+	VkImageView textureView = nullptr; // one per texture
+	VkSampler textureSampler = nullptr; // can be shared, effects quality & addressing mode
+	// note that unlike uniform buffers, we don't need one for each "in-flight" frame
+	VkDescriptorSet textureDescriptorSet = nullptr; // std::vector<> not required
+
+	// be aware that all pipeline shaders share the same bind points
+	VkDescriptorSetLayout pixelDescriptorLayout = nullptr;
+
 	GW::MATH::GMatrix proxy;
 	GW::MATH::GMATRIXF camera = GW::MATH::GIdentityMatrixF;
 	float aspect;
@@ -88,14 +99,14 @@ class Renderer
 	std::chrono::steady_clock::time_point start;
 	GW::MATH::GVECTORF lightDir = { -1, -1, 2 };
 	GW::MATH::GVECTORF lightClr = { 0.9, 0.9, 1.0};
-	// TODO: Part 2b
+	
 	SHADER_MODEL_DATA sceneData;
 	Push_Constants pushConstants;
 
 	unsigned indexOffset = 0;
 	unsigned vertexOffset = 0;
 	unsigned materialOffset = 0;
-	// TODO: Part 4g
+	
 public:
 
 	Renderer(GW::SYSTEM::GWindow _win, GW::GRAPHICS::GVulkanSurface _vlk, Level_Data _levelData)
@@ -110,7 +121,7 @@ public:
 
 		inputProxy.Create(win);
 		controllerProxy.Create();
-		// TODO: Part 2a
+
 		proxy.Create();
 		GW::MATH::GVECTORF eye = { 0.75, 0.25, -1.5, 1 };
 		GW::MATH::GVECTORF center = { 0.15, 0.75, 0, 1 };
@@ -118,25 +129,18 @@ public:
 		proxy.LookAtLHF(eye, center, up, camera);
 		vlk.GetAspectRatio(aspect);
 		proxy.ProjectionVulkanLHF(1.13446f, aspect, 0.1f, 100.0f, perspective);
-		// TODO: Part 2b
-		//sceneData.sunDirection = lightDir;
+
 		sceneData.sunColor = lightClr;
 		sceneData.viewMatrix = camera;
 		sceneData.projectionMatrix = perspective;
 		sceneData.cameraPos = eye;
-		//sceneData.matricies[0] = world;
-		//sceneData.matricies[1] = world;
 
-
-		// TODO: Part 4g
-		// TODO: part 3b
 		for (int i = 0; i < levelData.levelMaterials.size(); ++i) {
 			sceneData.materials[i] = levelData.levelMaterials[i].attrib;
 		}
 		for (int i = 0; i < levelData.levelTransforms.size(); ++i) {
 			sceneData.matricies[i] = levelData.levelTransforms[i];
 		}
-		//sceneData.matricies[0] = GW::MATH::GIdentityMatrixF;
 
 		/***************** GEOMETRY INTIALIZATION ******************/
 		// Grab the device & physical device so we can allocate some stuff
@@ -150,13 +154,13 @@ public:
 			VK_BUFFER_USAGE_VERTEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
 			VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &vertexHandle, &vertexData);
 		GvkHelper::write_to_buffer(device, vertexData, levelData.levelVertices.data(), vertexSize);
-		// TODO: Part 1g
+
 		unsigned indexSize = levelData.levelIndices.size() * sizeof(unsigned);
 		GvkHelper::create_buffer(physicalDevice, device, indexSize,
 			VK_BUFFER_USAGE_INDEX_BUFFER_BIT, VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT |
 			VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, &indexHandle, &indexData);
 		GvkHelper::write_to_buffer(device, indexData, levelData.levelIndices.data(), indexSize);
-		// TODO: Part 2d
+
 		UINT32 numBBS = 0;
 		vlk.GetSwapchainImageCount(numBBS);
 		storageHandle.resize(numBBS);
@@ -196,6 +200,15 @@ public:
 		GvkHelper::create_shader_module(device, shaderc_result_get_length(result), // load into Vulkan
 			(char*)shaderc_result_get_bytes(result), &pixelShader);
 		shaderc_result_release(result); // done
+		// Create Texture Pixel Shader
+		result = shaderc_compile_into_spv( // compile
+			compiler, texturePixelShaderSource, strlen(texturePixelShaderSource),
+			shaderc_fragment_shader, "main.frag", "main", options);
+		if (shaderc_result_get_compilation_status(result) != shaderc_compilation_status_success) // errors?
+			std::cout << "Pixel Shader Errors: " << shaderc_result_get_error_message(result) << std::endl;
+		GvkHelper::create_shader_module(device, shaderc_result_get_length(result), // load into Vulkan
+			(char*)shaderc_result_get_bytes(result), &texturePixelShader);
+		shaderc_result_release(result); // done
 		// Free runtime shader compiler resources
 		shaderc_compile_options_release(options);
 		shaderc_compiler_release(compiler);
@@ -220,7 +233,6 @@ public:
 		assembly_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_INPUT_ASSEMBLY_STATE_CREATE_INFO;
 		assembly_create_info.topology = VK_PRIMITIVE_TOPOLOGY_TRIANGLE_LIST;
 		assembly_create_info.primitiveRestartEnable = false;
-		// TODO: Part 1e
 		// Vertex Input State
 		VkVertexInputBindingDescription vertex_binding_description = {};
 		vertex_binding_description.binding = 0;
@@ -310,7 +322,6 @@ public:
 		dynamic_create_info.dynamicStateCount = 2;
 		dynamic_create_info.pDynamicStates = dynamic_state;
 
-		// TODO: Part 2e
 		VkDescriptorSetLayoutBinding layout_binding = {};
 		layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
 		layout_binding.stageFlags = VK_SHADER_STAGE_VERTEX_BIT | VK_SHADER_STAGE_FRAGMENT_BIT;
@@ -323,7 +334,45 @@ public:
 		layout_create_info.pNext = nullptr;
 		layout_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_LAYOUT_CREATE_INFO;
 		vkCreateDescriptorSetLayout(device, &layout_create_info, nullptr, &descriptorLayout);
-		// TODO: Part 2f
+
+		/***************** TEXTURE DESCRIPTOR FOR FRAGMENT/PIXEL SHADER ******************/
+
+		// desribes the order and type of resources bound to the pixel shader
+		VkDescriptorSetLayoutBinding pshader_descriptor_layout_binding = {};
+		pshader_descriptor_layout_binding.binding = 0;
+		pshader_descriptor_layout_binding.descriptorCount = 1;
+		pshader_descriptor_layout_binding.descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+		pshader_descriptor_layout_binding.stageFlags = VK_SHADER_STAGE_FRAGMENT_BIT;
+		pshader_descriptor_layout_binding.pImmutableSamplers = nullptr;
+		// pixel shader will have its own descriptor set layout
+		layout_create_info.pBindings = &pshader_descriptor_layout_binding;
+		vkCreateDescriptorSetLayout(device, &layout_create_info, nullptr, &pixelDescriptorLayout);
+		// Create a descriptor pool!
+		// this is how many unique descriptor sets you want to allocate 
+		// we need one for each uniform buffer and one for each unique texture
+		unsigned int total_descriptorsets = storageHandle.size() + 1;
+		VkDescriptorPoolCreateInfo descriptorpool_create_info = {};
+		descriptorpool_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
+		VkDescriptorPoolSize descriptorpool_size[2] = {
+			{ VK_DESCRIPTOR_TYPE_UNIFORM_BUFFER, storageHandle.size() },
+			{ VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER, 1 }
+		};
+		descriptorpool_create_info.poolSizeCount = 2;
+		descriptorpool_create_info.pPoolSizes = descriptorpool_size;
+		descriptorpool_create_info.maxSets = total_descriptorsets;
+		descriptorpool_create_info.flags = 0;
+		descriptorpool_create_info.pNext = nullptr;
+		vkCreateDescriptorPool(device, &descriptorpool_create_info, nullptr, &descriptorPool);
+		// Create a descriptor set for our texture!
+		VkDescriptorSetAllocateInfo descriptorset_allocate_info = {};
+		descriptorset_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+		descriptorset_allocate_info.descriptorSetCount = 1;
+		descriptorset_allocate_info.pSetLayouts = &pixelDescriptorLayout;
+		descriptorset_allocate_info.descriptorPool = descriptorPool;
+		descriptorset_allocate_info.pNext = nullptr;
+		vkAllocateDescriptorSets(device, &descriptorset_allocate_info, &textureDescriptorSet);
+		// end texturing descriptor specifics
+		
 		VkDescriptorPoolSize pool_size = {};
 		pool_size.descriptorCount = numBBS;
 		pool_size.type = VK_DESCRIPTOR_TYPE_STORAGE_BUFFER;
@@ -335,8 +384,6 @@ public:
 		pool_create_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_POOL_CREATE_INFO;
 		pool_create_info.flags = 0;
 		vkCreateDescriptorPool(device, &pool_create_info, nullptr, &descriptorPool);
-		// TODO: Part 4f
-	// TODO: Part 2g
 		for (int i = 0; i < numBBS; i++)
 		{
 			VkDescriptorSetAllocateInfo set_allocate_info = {};
@@ -346,8 +393,7 @@ public:
 			set_allocate_info.pSetLayouts = &descriptorLayout;
 			set_allocate_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
 			vkAllocateDescriptorSets(device, &set_allocate_info, &descriptorSet[i]);
-			// TODO: Part 4f
-		// TODO: Part 2h
+
 			VkDescriptorBufferInfo descriptor_buffer_info = {};
 			descriptor_buffer_info.buffer = storageHandle[i];
 			descriptor_buffer_info.offset = 0;
@@ -365,15 +411,14 @@ public:
 			write_descriptor_set.pTexelBufferView = nullptr;
 			vkUpdateDescriptorSets(device, 1, &write_descriptor_set, 0, nullptr);
 		}
-		// TODO: Part 4f
 
 	// Descriptor pipeline layout
 		VkPipelineLayoutCreateInfo pipeline_layout_create_info = {};
 		pipeline_layout_create_info.sType = VK_STRUCTURE_TYPE_PIPELINE_LAYOUT_CREATE_INFO;
-		// TODO: Part 2e
+		
 		pipeline_layout_create_info.setLayoutCount = 1;
 		pipeline_layout_create_info.pSetLayouts = &descriptorLayout;
-		// TODO: Part 3c
+		
 		VkPushConstantRange push_constant_range = {};
 		push_constant_range.offset = 0;
 		push_constant_range.size = sizeof(Push_Constants);

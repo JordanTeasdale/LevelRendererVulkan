@@ -45,10 +45,7 @@ struct OUTPUT_TO_RASTERIZER
 // TODO: Part 4b
 float4 main(OUTPUT_TO_RASTERIZER inputVertex) : SV_TARGET
 {
-	//return float4(0.75f ,0, 0, 0); // TODO: Part 1a
-	// TODO: Part 3a
     float4 matColor = float4(SceneData[0].materials[mesh_ID].Kd, 1);
-	// TODO: Part 4c
     // Diffuse and Ambient lights
     float3 normalizedNRM = normalize(inputVertex.nrmW);
     float lightRatio = saturate(dot(normalize(-SceneData[0].sunDirection), normalizedNRM));
@@ -60,10 +57,6 @@ float4 main(OUTPUT_TO_RASTERIZER inputVertex) : SV_TARGET
     float intensity = max(pow(saturate(dot(normalizedNRM, halfVec)), SceneData[0].materials[mesh_ID].Ns), 0);
     float4 reflectedLight = intensity * float4(SceneData[0].materials[mesh_ID].Ks, 1);
     
-    //float4 finalColor = diffuseColor + reflectedLight;
-    //return float4(saturate(directColor + indirectColor), 1);
     return (float4(saturate(directColor + indirectColor), 1) * matColor) + reflectedLight;
-	// TODO: Part 4g (half-vector or reflect method your choice)
-    //return finalColor;
 
 }
