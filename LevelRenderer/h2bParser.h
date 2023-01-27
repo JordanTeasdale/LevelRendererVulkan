@@ -106,6 +106,7 @@ namespace H2B {
 			}
 			return true;
 		}
+
 		void Clear()
 		{
 			*reinterpret_cast<unsigned*>(version) = 0;

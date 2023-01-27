@@ -67,5 +67,6 @@ float4 main(OUTPUT_TO_RASTERIZER inputVertex) : SV_TARGET
     float intensity = max(pow(saturate(dot(normalizedNRM, halfVec)), SceneData[0].materials[mesh_ID].Ns), 0);
     float4 reflectedLight = intensity * float4(SceneData[0].materials[mesh_ID].Ks, 1);
     
-    return (float4(saturate(directColor + indirectColor), 1) * texel * matColor) + reflectedLight;
+    //return (float4(saturate(directColor + indirectColor), 1) * texel * matColor) + reflectedLight;
+    return float4(0.75, 0.75, 0.25, 1);
 }
